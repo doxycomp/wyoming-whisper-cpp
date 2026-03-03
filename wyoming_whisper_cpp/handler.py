@@ -102,7 +102,26 @@ class WhisperCppEventHandler(AsyncEventHandler):
                                 ).decode().strip()
                             )
 
-                        text = " ".join(lines)
+                        # Drop lines that are log/error output from the binary (e.g. OpenVINO
+                        # exceptions on stdout) so they are not sent as transcript to the client.
+                        # Use narrow patterns so dictated words like "error" or "it failed" pass through.
+                        transcript_lines = []
+                        for ln in lines:
+                            low = ln.lower()
+                            if (
+                                ln.startswith("whisper_")
+                                or ln.startswith("main:")
+                                or ln.startswith("ggml_")
+                                or ln.startswith("system_info:")
+                                or "exception:" in low
+                                or "could not open" in low
+                                or "failed to init" in low
+                                or "failed to open" in low
+                            ):
+                                _LOGGER.debug("Binary log/error line (not transcript): %s", ln[:200])
+                                continue
+                            transcript_lines.append(ln)
+                        text = " ".join(transcript_lines)
                         text = text.replace("[BLANK_AUDIO]", "").strip()
                     except (ConnectionResetError, BrokenPipeError, OSError) as e:
                         code = self.model_proc.returncode

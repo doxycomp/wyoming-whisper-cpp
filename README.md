@@ -83,13 +83,22 @@ CMAKE_ARGS="-DGGML_VULKAN=1" pip install .
 
 ### Core ML (macOS / Apple Silicon)
 
-On Apple Silicon, the encoder can run on the Apple Neural Engine (ANE) via Core ML for faster inference. Build with:
+On Apple Silicon, the encoder can run on the Apple Neural Engine (ANE) via Core ML for faster inference. **Build is macOS-only;** you need Xcode (and `xcode-select --install` for command-line tools). No extra SDK or PATH is required at runtime—Core ML is part of the system. Build with:
 
 ``` sh
 CMAKE_ARGS="-DWHISPER_COREML=1" pip install .
 ```
 
-Use Core ML–converted encoder models (e.g. from whisper.cpp’s `models/generate-coreml-model.sh` or pre-built from [whisper.cpp Core ML dataset](https://huggingface.co/datasets/ggerganov/whisper.cpp-coreml)). Place the `.mlmodelc` encoder in the same directory as the ggml model (your `--data-dir`), named e.g. `ggml-<model>-encoder.mlmodelc`. The server will load them automatically when available.
+The Core ML **encoder** (`.mlmodelc`) is not downloaded with the ggml model. Generate it with whisper.cpp’s script or use pre-built files from the [whisper.cpp Core ML dataset](https://huggingface.co/datasets/ggerganov/whisper.cpp-coreml). Example (on macOS, from repo root):
+
+```sh
+cd whisper.cpp/models
+pip install -r requirements-coreml.txt
+./generate-coreml-model.sh base.en   # or small, medium, large-v3, etc.
+# Copy the resulting ggml-<model>-encoder.mlmodelc into your --data-dir
+```
+
+Place the encoder in the same directory as the ggml model (your `--data-dir`), named e.g. `ggml-<model>-encoder.mlmodelc`. The server loads it automatically when present.
 
 ### OpenVINO (Intel CPU / GPU)
 
@@ -99,7 +108,16 @@ OpenVINO runs the encoder on Intel CPUs or Intel GPUs (integrated or discrete). 
 CMAKE_ARGS="-DWHISPER_OPENVINO=1" pip install .
 ```
 
-Install the [OpenVINO runtime](https://github.com/openvinotoolkit/openvino/releases) and place OpenVINO encoder files (`ggml-<model>-encoder-openvino.xml` / `.bin`) next to the ggml model in `--data-dir`. Choose the device with `--openvino-device` (e.g. `CPU`, `GPU`):
+The OpenVINO **encoder** files are not downloaded automatically. You must generate them from the ggml model using whisper.cpp’s conversion script, then place `ggml-<model>-encoder-openvino.xml` and `.bin` in `--data-dir` next to the ggml model. Example for `large-v3` (from the repo root, with OpenVINO Python deps installed):
+
+```sh
+cd whisper.cpp/models
+pip install -r requirements-openvino.txt
+python convert-whisper-to-openvino.py --model large-v3
+# Copy ggml-large-v3-encoder-openvino.xml and .bin into your --data-dir (e.g. data/)
+```
+
+Install the [OpenVINO runtime](https://github.com/openvinotoolkit/openvino/releases) and set `OPENVINO_DIR` before starting the server (see above). Choose the device with `--openvino-device` (e.g. `CPU`, `GPU`):
 
 ``` sh
 wyoming-whisper-cpp ... --openvino-device GPU

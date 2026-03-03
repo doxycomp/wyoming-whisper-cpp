@@ -196,7 +196,7 @@ async def main() -> None:
     model_args = [
         binpath,
         "--model",
-        str(model_path),
+        str(model_path.resolve()),
         "--language", 
         str(args.language),
         "--beam-size",

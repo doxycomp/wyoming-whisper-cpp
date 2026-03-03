@@ -441,8 +441,13 @@ int main(int argc, char ** argv) {
         return 3;
     }
 
-    // initialize openvino encoder. this has no effect on whisper.cpp builds that don't have OpenVINO configured
-    whisper_ctx_init_openvino_encoder(ctx, nullptr, params.openvino_encode_device.c_str(), nullptr);
+    // Initialize OpenVINO encoder only when no GPU device was explicitly selected (--gpu-device).
+    // When the user chooses a GPU (e.g. Vulkan via --gpu-device 1), we skip OpenVINO so the
+    // encoder runs on Vulkan/CPU like the rest of the model. If OpenVINO init fails (e.g. missing
+    // encoder .xml/.bin), whisper.cpp continues without it; any error on stdout is filtered by the server.
+    if (params.gpu_device < 0) {
+        whisper_ctx_init_openvino_encoder(ctx, nullptr, params.openvino_encode_device.c_str(), nullptr);
+    }
 
     if (!params.grammar.empty()) {
         auto & grammar = params.grammar_parsed;
