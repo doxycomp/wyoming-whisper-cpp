@@ -4,6 +4,8 @@
 
 ## Local Install
 
+**Ausführliche Anleitung für Linux, WSL2 und Windows:** [INSTALL.md](INSTALL.md)
+
 Install dependencies:
 
 ```sh
@@ -16,7 +18,10 @@ Clone the repository and set up Python virtual environment:
 git clone https://github.com/rhasspy/wyoming-whisper-cpp.git --recursive
 cd wyoming-whisper-cpp
 python -m venv venv
+# Linux / WSL2:
 source venv/bin/activate
+# Windows (PowerShell):
+# .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pip install .
 ```
@@ -40,10 +45,44 @@ docker run -it -p 10300:10300 -v /path/to/local/data:/data rhasspy/wyoming-whisp
 
 [Source](https://github.com/rhasspy/wyoming-addons/tree/master/whisper-cpp)
 
+## Platforms: Linux, WSL2, Windows
+
+| Platform | Supported | Notes |
+|----------|-----------|--------|
+| **Linux** | Yes | Native. Use `source venv/bin/activate`; Vulkan/SYCL/CUDA as documented. |
+| **WSL2** | Yes | Same as Linux. For GPU: install Vulkan/GPU stack in WSL2 (e.g. Intel/AMD/NVIDIA drivers for WSL2). |
+| **Windows** | Yes | Use `.venv\Scripts\Activate.ps1`; the server uses `whisper-wyoming.exe`. Model download uses a shell script: run from **Git Bash** or **WSL2**, or [download the model](https://huggingface.co/ggerganov/whisper.cpp) manually (e.g. `ggml-<model>.bin`) into `--data-dir`. |
+
+Build requirements: Python 3.7+, CMake 3.16+, and a C++ compiler (e.g. GCC/clang on Linux/WSL2, Visual Studio Build Tools on Windows).
+
 ## GPU Support
 
-To build with GPU support, pass the relevant CMake flags to the install command:
+To build with GPU support, pass the relevant CMake flags to the install command.
+
+### Vulkan (AMD, Intel, NVIDIA)
+
+Works on Intel Arc and Intel integrated GPUs with Vulkan drivers:
 
 ``` sh
 CMAKE_ARGS="-DGGML_VULKAN=1" pip install .
 ```
+
+### Intel GPUs (native via SYCL/oneAPI)
+
+For native Intel GPU acceleration (Arc, integrated, Data Center Max/Flex), use SYCL. Requires [Intel oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit.html) and (on Windows) Intel DPC++/icx compiler:
+
+``` sh
+# Linux (typical)
+source /opt/intel/oneapi/setvars.sh
+CMAKE_ARGS="-DGGML_SYCL=ON" pip install .
+
+# Windows: use Intel oneAPI environment, then e.g.:
+# set CMAKE_ARGS=-DGGML_SYCL=ON
+# pip install .
+```
+
+### Other backends
+
+- **Core ML (macOS):** `CMAKE_ARGS="-DWHISPER_COREML=1" pip install .`
+- **OpenVINO:** `CMAKE_ARGS="-DWHISPER_OPENVINO=1" pip install .`
+- **CUDA (NVIDIA):** `CMAKE_ARGS="-DGGML_CUDA=1" pip install .`

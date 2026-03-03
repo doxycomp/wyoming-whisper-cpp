@@ -136,7 +136,8 @@ async def main() -> None:
     if args.whisper_cpp_args:
         optional_args.extend(shlex.split(args.whisper_cpp_args))
 
-    binpath = os.path.join(os.path.dirname(__file__), "bin", "whisper-wyoming")
+    _bin = "whisper-wyoming.exe" if os.name == "nt" else "whisper-wyoming"
+    binpath = os.path.join(os.path.dirname(__file__), "bin", _bin)
 
     model_args = [
         binpath,
