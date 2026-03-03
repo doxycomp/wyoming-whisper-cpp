@@ -69,6 +69,8 @@ CMAKE_ARGS="-DGGML_VULKAN=1" pip install .
 
 **Windows:** Install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) first so CMake finds Vulkan and **glslc**. Then open a new terminal and run the install. See [INSTALL.md](INSTALL.md) if you get "Could NOT find Vulkan".
 
+**Intel Arc + integrated GPU:** If you have both and the server uses the wrong one, start with `--gpu-device 1` (Arc is often device 1; try `0` or `1` depending on your system).
+
 ### Intel GPUs
 
 - **Vulkan (recommended on Windows):** Works with the normal MSVC build; no extra toolchain:

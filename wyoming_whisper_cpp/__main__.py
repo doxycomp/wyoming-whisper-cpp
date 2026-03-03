@@ -59,6 +59,12 @@ async def main() -> None:
         help="Enable Flash Attention (faster on CUDA/Metal if built with support)",
     )
     parser.add_argument(
+        "--gpu-device",
+        type=int,
+        metavar="N",
+        help="Vulkan/GPU device index to use (e.g. 1 for second GPU). Sets GGML_VK_VISIBLE_DEVICES. Use 0 for first GPU, 1 for second (e.g. Intel Arc if integrated is 0).",
+    )
+    parser.add_argument(
         "--whisper-cpp-args",
         help="Additional arguments to pass to whisper cpp executable",
     )
@@ -158,10 +164,15 @@ async def main() -> None:
     ]
 
     _LOGGER.debug(model_args)
+    env = os.environ.copy()
+    if getattr(args, "gpu_device", None) is not None:
+        env["GGML_VK_VISIBLE_DEVICES"] = str(args.gpu_device)
+        _LOGGER.info("Using GPU device %s (GGML_VK_VISIBLE_DEVICES=%s)", args.gpu_device, env["GGML_VK_VISIBLE_DEVICES"])
     model_proc = await asyncio.create_subprocess_exec(
         *model_args,
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
+        env=env,
     )
     assert model_proc.stdin is not None
     assert model_proc.stdout is not None
