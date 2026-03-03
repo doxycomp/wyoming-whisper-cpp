@@ -62,7 +62,7 @@ async def main() -> None:
         "--gpu-device",
         type=int,
         metavar="N",
-        help="Vulkan/GPU device index to use (e.g. 1 for second GPU). Sets GGML_VK_VISIBLE_DEVICES. Use 0 for first GPU, 1 for second (e.g. Intel Arc if integrated is 0).",
+        help="Vulkan/GPU device index to use (e.g. 1 for second GPU). Passed to whisper-wyoming as --gpu-device; all devices stay visible in the list, this index selects which one to use (0 = first, 1 = second, e.g. Intel Arc).",
     )
     parser.add_argument(
         "--whisper-cpp-args",
@@ -146,6 +146,8 @@ async def main() -> None:
     optional_args = ["--audio-context-base", str(args.audio_context_base)]
     if args.flash_attn:
         optional_args.append("--flash-attn")
+    if getattr(args, "gpu_device", None) is not None:
+        optional_args.extend(["--gpu-device", str(args.gpu_device)])
     if args.whisper_cpp_args:
         optional_args.extend(shlex.split(args.whisper_cpp_args))
 
@@ -166,8 +168,7 @@ async def main() -> None:
     _LOGGER.debug(model_args)
     env = os.environ.copy()
     if getattr(args, "gpu_device", None) is not None:
-        env["GGML_VK_VISIBLE_DEVICES"] = str(args.gpu_device)
-        _LOGGER.info("Using GPU device %s (GGML_VK_VISIBLE_DEVICES=%s)", args.gpu_device, env["GGML_VK_VISIBLE_DEVICES"])
+        _LOGGER.info("Using GPU device index %s (passed to whisper-wyoming --gpu-device)", args.gpu_device)
     model_proc = await asyncio.create_subprocess_exec(
         *model_args,
         stdin=asyncio.subprocess.PIPE,

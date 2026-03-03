@@ -75,6 +75,7 @@ struct whisper_params {
     bool use_gpu         = true;
     bool flash_attn      = false;
     bool suppress_nst    = false;
+    int32_t gpu_device   = -1;  // -1 = default; 0,1,... = Vulkan/GPU device index (all devices visible, this one is used)
 
     std::string language  = "en";
     std::string prompt;
@@ -154,6 +155,7 @@ static bool whisper_params_parse(int argc, char ** argv, whisper_params & params
         else if (arg == "-dtw"  || arg == "--dtw")             { params.dtw             = ARGV_NEXT; }
         else if (arg == "-ls"   || arg == "--log-score")       { params.log_score       = true; }
         else if (arg == "-ng"   || arg == "--no-gpu")          { params.use_gpu         = false; }
+        else if (                  arg == "--gpu-device")     { params.gpu_device      = std::stoi(ARGV_NEXT); }
         else if (arg == "-fa"   || arg == "--flash-attn")      { params.flash_attn      = true; }
         else if (arg == "-sns"  || arg == "--suppress-nst")    { params.suppress_nst    = true; }
         else if (                  arg == "--suppress-regex")  { params.suppress_regex  = ARGV_NEXT; }
@@ -212,6 +214,7 @@ static void whisper_print_usage(int /*argc*/, char ** argv, const whisper_params
     fprintf(stderr, "  -dtw MODEL --dtw MODEL         [%-7s] compute token-level timestamps\n",                 params.dtw.c_str());
     fprintf(stderr, "  -ls,       --log-score         [%-7s] log best decoder scores of tokens\n",              params.log_score?"true":"false");
     fprintf(stderr, "  -ng,       --no-gpu            [%-7s] disable GPU\n",                                    params.use_gpu ? "false" : "true");
+    fprintf(stderr, "  --gpu-device N                 [%-7d] Vulkan/GPU device index (e.g. 1 for second GPU; -1 = default)\n", params.gpu_device);
     fprintf(stderr, "  -fa,       --flash-attn        [%-7s] flash attention\n",                                params.flash_attn ? "true" : "false");
     fprintf(stderr, "  -sns,      --suppress-nst      [%-7s] suppress non-speech tokens\n",                     params.suppress_nst ? "true" : "false");
     fprintf(stderr, "  --suppress-regex REGEX         [%-7s] regular expression matching tokens to suppress\n", params.suppress_regex.c_str());
@@ -404,6 +407,9 @@ int main(int argc, char ** argv) {
 
     cparams.use_gpu    = params.use_gpu;
     cparams.flash_attn = params.flash_attn;
+    if (params.gpu_device >= 0) {
+        cparams.gpu_device = params.gpu_device;
+    }
 
     if (!params.dtw.empty()) {
         cparams.dtw_token_timestamps = true;
