@@ -37,8 +37,6 @@ async def test_whisper_cpp(language: str) -> None:
         "wyoming_whisper_cpp",
         "--uri",
         "stdio://",
-        "--whisper-cpp-dir",
-        str(_PROGRAM_DIR / "whisper.cpp"),
         "--model",
         _MODEL,
         "--data-dir",
