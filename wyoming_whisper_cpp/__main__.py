@@ -65,6 +65,13 @@ async def main() -> None:
         help="Vulkan/GPU device index to use (e.g. 1 for second GPU). Passed to whisper-wyoming as --gpu-device; all devices stay visible in the list, this index selects which one to use (0 = first, 1 = second, e.g. Intel Arc).",
     )
     parser.add_argument(
+        "--openvino-device",
+        type=str,
+        metavar="DEVICE",
+        default=None,
+        help="OpenVINO device for encoder (e.g. CPU, GPU). Passed as --ov-e-device to whisper-wyoming. Only has effect when built with WHISPER_OPENVINO=1.",
+    )
+    parser.add_argument(
         "--whisper-cpp-args",
         help="Additional arguments to pass to whisper cpp executable",
     )
@@ -148,6 +155,8 @@ async def main() -> None:
         optional_args.append("--flash-attn")
     if getattr(args, "gpu_device", None) is not None:
         optional_args.extend(["--gpu-device", str(args.gpu_device)])
+    if getattr(args, "openvino_device", None):
+        optional_args.extend(["--ov-e-device", args.openvino_device])
     if args.whisper_cpp_args:
         optional_args.extend(shlex.split(args.whisper_cpp_args))
 

@@ -36,6 +36,8 @@ wyoming-whisper-cpp \
   --download-dir ./data
 ```
 
+Supported models include `tiny`, `base`, `small`, `medium`, `large-v3`, and `large-v3-turbo` (and quantized variants like `large-v3-turbo-q5_0`). See `wyoming-whisper-cpp --help` for the full list.
+
 ## Docker Image
 
 ``` sh
@@ -79,10 +81,34 @@ CMAKE_ARGS="-DGGML_VULKAN=1" pip install .
   ```
 - **SYCL (oneAPI):** Native Intel acceleration. Requires the **Intel DPC++ compiler (icx)** – on Windows, use the **Intel oneAPI Command Prompt** and e.g. `CMAKE_GENERATOR=Ninja` and `CMAKE_ARGS="-DGGML_SYCL=ON"`. Without the oneAPI environment you get "C++ compiler lacks SYCL support"; use Vulkan or build from the oneAPI prompt. See [INSTALL.md](INSTALL.md).
 
+### Core ML (macOS / Apple Silicon)
+
+On Apple Silicon, the encoder can run on the Apple Neural Engine (ANE) via Core ML for faster inference. Build with:
+
+``` sh
+CMAKE_ARGS="-DWHISPER_COREML=1" pip install .
+```
+
+Use Core ML–converted encoder models (e.g. from whisper.cpp’s `models/generate-coreml-model.sh` or pre-built from [whisper.cpp Core ML dataset](https://huggingface.co/datasets/ggerganov/whisper.cpp-coreml)). Place the `.mlmodelc` encoder in the same directory as the ggml model (your `--data-dir`), named e.g. `ggml-<model>-encoder.mlmodelc`. The server will load them automatically when available.
+
+### OpenVINO (Intel CPU / GPU)
+
+OpenVINO runs the encoder on Intel CPUs or Intel GPUs (integrated or discrete). Build with:
+
+``` sh
+CMAKE_ARGS="-DWHISPER_OPENVINO=1" pip install .
+```
+
+Install the [OpenVINO runtime](https://github.com/openvinotoolkit/openvino/releases) and place OpenVINO encoder files (`ggml-<model>-encoder-openvino.xml` / `.bin`) next to the ggml model in `--data-dir`. Choose the device with `--openvino-device` (e.g. `CPU`, `GPU`):
+
+``` sh
+wyoming-whisper-cpp ... --openvino-device GPU
+```
+
+Or pass through: `--whisper-cpp-args "--ov-e-device GPU"`.
+
 ### Other backends
 
-- **Core ML (macOS):** `CMAKE_ARGS="-DWHISPER_COREML=1" pip install .`
-- **OpenVINO:** `CMAKE_ARGS="-DWHISPER_OPENVINO=1" pip install .`
 - **CUDA (NVIDIA):** `CMAKE_ARGS="-DGGML_CUDA=1" pip install .`
 
 ### Flash Attention
