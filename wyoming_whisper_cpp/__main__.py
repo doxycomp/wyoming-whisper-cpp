@@ -19,6 +19,36 @@ from .handler import WhisperCppEventHandler
 _LOGGER = logging.getLogger(__name__)
 
 
+def _openvino_runtime_paths() -> list[str]:
+    """Return OpenVINO runtime bin paths to prepend to PATH so the child process finds DLLs (Windows)."""
+    paths: list[str] = []
+    if os.name != "nt":
+        return paths
+    # OPENVINO_DIR is often .../runtime/cmake; INTEL_OPENVINO_DIR is the toolkit root
+    ov_dir = os.environ.get("OPENVINO_DIR")
+    intel_ov = os.environ.get("INTEL_OPENVINO_DIR")
+    runtime_root: Optional[Path] = None
+    if ov_dir:
+        p = Path(ov_dir).resolve()
+        # OPENVINO_DIR = .../runtime/cmake -> runtime root = parent of cmake
+        if p.name == "cmake" and p.parent.name == "runtime":
+            runtime_root = p.parent
+    if runtime_root is None and intel_ov:
+        runtime_root = Path(intel_ov).resolve() / "runtime"
+    if runtime_root is None or not runtime_root.is_dir():
+        return paths
+    # Prefer Release; fallback to first existing
+    for sub in ("bin/intel64/Release", "bin/intel64/Debug", "bin/intel64"):
+        d = runtime_root / sub.replace("/", os.sep)
+        if d.is_dir():
+            paths.append(str(d))
+            break
+    tbb = runtime_root / "3rdparty" / "tbb" / "bin"
+    if tbb.is_dir():
+        paths.append(str(tbb))
+    return paths
+
+
 async def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser()
@@ -176,6 +206,11 @@ async def main() -> None:
 
     _LOGGER.debug(model_args)
     env = os.environ.copy()
+    # On Windows, prepend OpenVINO runtime bin to PATH so whisper-wyoming finds DLLs (exit 0xC0000135 otherwise)
+    ov_paths = _openvino_runtime_paths()
+    if ov_paths:
+        env["PATH"] = os.pathsep.join(ov_paths) + os.pathsep + env.get("PATH", "")
+        _LOGGER.debug("Prepended OpenVINO runtime to PATH for subprocess: %s", ov_paths)
     if getattr(args, "gpu_device", None) is not None:
         _LOGGER.info("Using GPU device index %s (passed to whisper-wyoming --gpu-device)", args.gpu_device)
     model_proc = await asyncio.create_subprocess_exec(
