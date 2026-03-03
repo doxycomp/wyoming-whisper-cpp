@@ -238,9 +238,46 @@ $env:CMAKE_GENERATOR = "Ninja"
 pip install .
 ```
 
+#### Build-Fehler: „No module named 'skbuild'“
+
+Die Build-Abhängigkeiten (scikit-build, cmake) müssen **vor** `pip install .` im venv liegen. Einmal ausführen:
+
+```powershell
+pip install -r requirements.txt
+```
+
+Danach erneut `pip install .` (ggf. mit CMAKE_GENERATOR und CMAKE_ARGS).
+
+#### Build-Fehler: „Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR glslc)“
+
+Für einen Vulkan-Build wird unter Windows das **Vulkan SDK** benötigt:
+
+1. **Vulkan SDK** von [LunarG](https://vulkan.lunarg.com/sdk/home#windows) herunterladen und installieren.
+2. **Neue** Developer-PowerShell (oder neues Terminal) öffnen, damit die Umgebungsvariable **VULKAN_SDK** gesetzt ist (wird vom Installer oft automatisch gesetzt, z. B. `C:\VulkanSDK\1.3.296.0`).
+3. Falls CMake Vulkan weiterhin nicht findet: `VULKAN_SDK` manuell setzen, z. B. `$env:VULKAN_SDK = "C:\VulkanSDK\1.3.296.0"` (Pfad zu deiner Installation anpassen), dann `pip install .` erneut ausführen.
+
+#### Build-Fehler: „FileTracker FTK1011“ / „Das System kann den angegebenen Pfad nicht finden“ (Vulkan-Build)
+
+Der Vulkan-Build erzeugt sehr tiefe Unterordner (z. B. `_skbuild\...\vulkan-shaders-gen-prefix\...`). Unter Windows kann die **Pfadlänge** dann die Grenze von 260 Zeichen überschreiten, und MSBuild meldet FTK1011.
+
+- **Lösung 1 – Kürzeren Projektpfad verwenden (empfohlen):**  
+  Repo in einen kurzen Pfad klonen und dort bauen, z. B.:
+  ```powershell
+  cd C:\
+  git clone https://github.com/rhasspy/wyoming-whisper-cpp.git --recursive w
+  cd w
+  # venv anlegen, CMAKE_GENERATOR + CMAKE_ARGS setzen, pip install .
+  ```
+  Beispiel: `C:\w` statt `C:\git\wyoming-faster-whisper\wyoming-whisper-cpp`.
+
+- **Lösung 2 – Lange Pfade in Windows erlauben:**  
+  [Lange Pfade aktivieren](https://learn.microsoft.com/de-de/windows/win32/fileio/maximum-file-path-limitation#enable-long-paths-in-windows-10-version-1607-and-later) (Group Policy oder Registry `LongPathsEnabled = 1`), danach Rechner neu starten und Build erneut ausführen.
+
 ### 3.4 Optional: GPU (Vulkan, Intel SYCL, CUDA)
 
 **Vulkan (z. B. Intel Arc / integrierte Intel-GPU):**
+
+Unter Windows wird dafür das **Vulkan SDK** benötigt (CMake sucht Vulkan-Libs, Headers und den Shader-Compiler **glslc**). Siehe unten bei „Could NOT find Vulkan“.
 
 ```powershell
 $env:CMAKE_ARGS="-DGGML_VULKAN=1"
@@ -248,12 +285,17 @@ pip install .
 ```
 
 **Intel SYCL (oneAPI):**  
-Intel oneAPI Base Toolkit installieren und die „Intel oneAPI command prompt“ bzw. die oneAPI-Umgebung nutzen, dann z. B.:
+SYCL braucht den **Intel DPC++-Compiler (icx)**, nicht MSVC. In der normalen PowerShell mit Visual Studio schlägt der Build mit „C++ compiler lacks SYCL support“ fehl.
 
-```powershell
-$env:CMAKE_ARGS="-DGGML_SYCL=ON"
-pip install .
-```
+- **Einfacher für Intel-GPU:** Statt SYCL **Vulkan** nutzen (siehe oben; funktioniert mit MSVC).
+- **SYCL trotzdem:** „Intel oneAPI 2024 command prompt for Intel 64“ (oder neuer) aus dem Startmenü öffnen, dann im Projektordner:
+  - Ninja als Generator und Intel-Compiler verwenden:
+  ```powershell
+  $env:CMAKE_GENERATOR = "Ninja"
+  $env:CMAKE_ARGS = "-DGGML_SYCL=ON"
+  pip install .
+  ```
+  In der oneAPI-Eingabeaufforderung sind `CC=icx` und `CXX=icpx` meist schon gesetzt; CMake nutzt dann den Intel-Compiler für SYCL.
 
 **NVIDIA CUDA:**
 

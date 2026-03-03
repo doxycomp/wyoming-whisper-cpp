@@ -67,19 +67,15 @@ Works on Intel Arc and Intel integrated GPUs with Vulkan drivers:
 CMAKE_ARGS="-DGGML_VULKAN=1" pip install .
 ```
 
-### Intel GPUs (native via SYCL/oneAPI)
+**Windows:** Install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) first so CMake finds Vulkan and **glslc**. Then open a new terminal and run the install. See [INSTALL.md](INSTALL.md) if you get "Could NOT find Vulkan".
 
-For native Intel GPU acceleration (Arc, integrated, Data Center Max/Flex), use SYCL. Requires [Intel oneAPI Base Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit.html) and (on Windows) Intel DPC++/icx compiler:
+### Intel GPUs
 
-``` sh
-# Linux (typical)
-source /opt/intel/oneapi/setvars.sh
-CMAKE_ARGS="-DGGML_SYCL=ON" pip install .
-
-# Windows: use Intel oneAPI environment, then e.g.:
-# set CMAKE_ARGS=-DGGML_SYCL=ON
-# pip install .
-```
+- **Vulkan (recommended on Windows):** Works with the normal MSVC build; no extra toolchain:
+  ``` sh
+  CMAKE_ARGS="-DGGML_VULKAN=1" pip install .
+  ```
+- **SYCL (oneAPI):** Native Intel acceleration. Requires the **Intel DPC++ compiler (icx)** – on Windows, use the **Intel oneAPI Command Prompt** and e.g. `CMAKE_GENERATOR=Ninja` and `CMAKE_ARGS="-DGGML_SYCL=ON"`. Without the oneAPI environment you get "C++ compiler lacks SYCL support"; use Vulkan or build from the oneAPI prompt. See [INSTALL.md](INSTALL.md).
 
 ### Other backends
 
