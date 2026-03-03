@@ -36,11 +36,13 @@ git clone https://github.com/rhasspy/wyoming-whisper-cpp.git --recursive
 cd wyoming-whisper-cpp
 ```
 
-Falls bereits ohne `--recursive` geklont:
+Falls bereits ohne `--recursive` geklont (oder Fehler „not our ref“ beim Submodule-Update):
 
 ```bash
 git submodule update --init --recursive
 ```
+
+Bei **„not our ref“ / „Direct fetching of that commit failed“**: siehe Abschnitt **3.2** (Windows), dort gleiche Lösung mit `script/fix-whisper-submodule.sh`.
 
 ### 1.3 Virtuelle Umgebung und Paket installieren
 
@@ -163,11 +165,36 @@ git clone https://github.com/rhasspy/wyoming-whisper-cpp.git --recursive
 cd wyoming-whisper-cpp
 ```
 
-Falls schon ohne `--recursive` geklont:
+Falls schon ohne `--recursive` geklont (oder der Ordner `whisper.cpp` leer ist), **vor** `pip install .` ausführen:
 
 ```powershell
 git submodule update --init --recursive
 ```
+
+Ohne dieses Submodul schlägt der Build mit „whisper.cpp does not contain a CMakeLists.txt“ fehl.
+
+#### Submodule-Fehler: „not our ref“ / „Direct fetching of that commit failed“
+
+Wenn `git submodule update --init --recursive` mit **„not our ref“** oder **„did not contain … Direct fetching of that commit failed“** abbricht, zeigt das Repo auf einen Commit, den es im Upstream (ggerganov/whisper.cpp) nicht mehr gibt. Submodul auf einen gültigen Stand bringen:
+
+**Windows (PowerShell, im Repo-Root):**
+
+```powershell
+.\script\fix-whisper-submodule.ps1
+git add whisper.cpp
+git commit -m "fix: point whisper.cpp submodule to v1.8.3"
+```
+
+**Linux/macOS:**
+
+```bash
+chmod +x script/fix-whisper-submodule.sh
+./script/fix-whisper-submodule.sh
+git add whisper.cpp
+git commit -m "fix: point whisper.cpp submodule to v1.8.3"
+```
+
+Danach wieder `pip install .` ausführen.
 
 ### 3.3 Virtuelle Umgebung und Paket installieren
 

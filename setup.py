@@ -7,6 +7,13 @@ from skbuild import setup
 from setuptools import find_packages
 
 this_dir = Path(__file__).parent
+whisper_cpp_cmake = this_dir / "whisper.cpp" / "CMakeLists.txt"
+if not whisper_cpp_cmake.is_file():
+    raise SystemExit(
+        "whisper.cpp submodule is missing or not initialized.\n"
+        "Run in the repo root: git submodule update --init --recursive\n"
+        "Then run: pip install ."
+    )
 
 requirements = []
 requirements_path = this_dir / "requirements.txt"
