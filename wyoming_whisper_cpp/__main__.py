@@ -15,6 +15,7 @@ from . import __version__
 from .const import WHISPER_LANGUAGES
 from .download import WHISPER_CPP_MODELS, download_model, model_name_to_path
 from .handler import WhisperCppEventHandler
+from .openvino_convert import ensure_openvino_encoder
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -108,7 +109,7 @@ async def main() -> None:
     parser.add_argument(
         "--strip-emoji",
         action="store_true",
-        help="Remove emojis and similar symbols from transcripts (e.g. 👾😊✅) so output is better suited for TTS.",
+        help="Remove emojis and similar symbols from transcripts (e.g. 👾😊✅). Useful when output is fed into TTS, which often cannot speak emojis.",
     )
     #
     parser.add_argument("--debug", action="store_true", help="Log DEBUG messages")
@@ -146,6 +147,9 @@ async def main() -> None:
         model_path = model_name_to_path(args.model, args.download_dir)
 
     assert model_path is not None
+
+    # If OpenVINO encoder files are missing, try to generate them (when whisper.cpp script is available)
+    ensure_openvino_encoder(model_path, model_path.parent)
 
     if ".en" in args.model:
         # English-only model

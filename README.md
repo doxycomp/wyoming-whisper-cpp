@@ -108,7 +108,7 @@ OpenVINO runs the encoder on Intel CPUs or Intel GPUs (integrated or discrete). 
 CMAKE_ARGS="-DWHISPER_OPENVINO=1" pip install .
 ```
 
-The OpenVINO **encoder** files are not downloaded automatically. You must generate them from the ggml model using whisper.cpp’s conversion script, then place `ggml-<model>-encoder-openvino.xml` and `.bin` in `--data-dir` next to the ggml model. Example for `large-v3` (from the repo root, with OpenVINO Python deps installed):
+The OpenVINO **encoder** files are not downloaded automatically. You must generate them from the ggml model using whisper.cpp’s conversion script, then place `ggml-<model>-encoder-openvino.xml` and `.bin` in `--data-dir` next to the ggml model. If the encoder is missing and the repo has the whisper.cpp submodule, the server can try to convert once at startup (install first: `pip install openvino torch openai-whisper`). Otherwise generate manually. Example for `large-v3` (from the repo root):
 
 ```sh
 cd whisper.cpp/models
