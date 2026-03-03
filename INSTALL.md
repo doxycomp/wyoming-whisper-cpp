@@ -1,21 +1,21 @@
-# Installationsanleitung – Wyoming Whisper.cpp
+# Installation Guide – Wyoming Whisper.cpp
 
-Diese Anleitung beschreibt die Installation für **Linux**, **WSL2** und **Windows** Schritt für Schritt.
+This guide describes installation for **Linux**, **WSL2**, and **Windows** step by step.
 
 ---
 
-## Voraussetzungen (alle Plattformen)
+## Prerequisites (all platforms)
 
-- **Python** 3.7 oder neuer  
-- **CMake** 3.16 oder neuer  
-- **C++-Compiler** (plattformspezifisch, siehe unten)  
-- **Git** (mit Submodul-Support)
+- **Python** 3.7 or newer  
+- **CMake** 3.16 or newer  
+- **C++ compiler** (platform-specific; see below)  
+- **Git** (with submodule support)
 
 ---
 
 ## 1. Linux
 
-### 1.1 Build-Tools und Abhängigkeiten
+### 1.1 Build tools and dependencies
 
 ```bash
 # Debian/Ubuntu
@@ -29,22 +29,22 @@ sudo dnf install -y gcc-c++ cmake git python3 python3-pip
 sudo pacman -S base-devel cmake git python python-pip
 ```
 
-### 1.2 Repository klonen (mit Submodul)
+### 1.2 Clone repository (with submodule)
 
 ```bash
 git clone https://github.com/rhasspy/wyoming-whisper-cpp.git --recursive
 cd wyoming-whisper-cpp
 ```
 
-Falls bereits ohne `--recursive` geklont (oder Fehler „not our ref“ beim Submodule-Update):
+If you already cloned without `--recursive` (or get "not our ref" when updating the submodule):
 
 ```bash
 git submodule update --init --recursive
 ```
 
-Bei **„not our ref“ / „Direct fetching of that commit failed“**: siehe Abschnitt **3.2** (Windows), dort gleiche Lösung mit `script/fix-whisper-submodule.sh`.
+For **"not our ref" / "Direct fetching of that commit failed"**: see **Section 3.2** (Windows); the same fix applies using `script/fix-whisper-submodule.sh`.
 
-### 1.3 Virtuelle Umgebung und Paket installieren
+### 1.3 Virtual environment and package install
 
 ```bash
 python3 -m venv venv
@@ -64,7 +64,7 @@ CMAKE_ARGS="-DGGML_VULKAN=1" pip install .
 **Intel SYCL (oneAPI):**
 
 ```bash
-# oneAPI Base Toolkit installieren, dann:
+# Install oneAPI Base Toolkit, then:
 source /opt/intel/oneapi/setvars.sh
 CMAKE_ARGS="-DGGML_SYCL=ON" pip install .
 ```
@@ -75,7 +75,7 @@ CMAKE_ARGS="-DGGML_SYCL=ON" pip install .
 CMAKE_ARGS="-DGGML_CUDA=1" pip install .
 ```
 
-### 1.5 Server starten
+### 1.5 Start the server
 
 ```bash
 source venv/bin/activate
@@ -87,22 +87,22 @@ wyoming-whisper-cpp \
   --download-dir ./data
 ```
 
-Beim ersten Start wird das Modell per Skript in `./data` geladen. Bei Problemen: [Modell manuell herunterladen](https://huggingface.co/ggerganov/whisper.cpp) und als `ggml-<modell>.bin` in `--data-dir` ablegen.
+On first run the model is downloaded via script into `./data`. If that fails: [download the model manually](https://huggingface.co/ggerganov/whisper.cpp) and place it as `ggml-<model>.bin` in your `--data-dir`.
 
 ---
 
 ## 2. WSL2 (Windows Subsystem for Linux)
 
-Unter WSL2 wird wie unter **Linux** vorgegangen. Die Schritte entsprechen Abschnitt 1.
+On WSL2, follow the **Linux** steps. The procedure matches Section 1.
 
-### 2.1 Build-Tools (in der WSL2-Shell)
+### 2.1 Build tools (in WSL2 shell)
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y build-essential cmake git python3 python3-venv python3-pip
 ```
 
-### 2.2 Klonen, venv, Installation
+### 2.2 Clone, venv, install
 
 ```bash
 git clone https://github.com/rhasspy/wyoming-whisper-cpp.git --recursive
@@ -115,21 +115,21 @@ pip install .
 
 ### 2.3 Optional: GPU in WSL2
 
-- **Vulkan:** In WSL2 einen Vulkan-Treiber nutzen (z. B. für Intel/AMD/NVIDIA). Je nach Hersteller: Treiber und ggf. `vulkan-utils` in WSL2 installieren, dann:
+- **Vulkan:** Use a Vulkan driver in WSL2 (e.g. for Intel/AMD/NVIDIA). Install the driver and optionally `vulkan-utils` in WSL2, then:
 
   ```bash
   CMAKE_ARGS="-DGGML_VULKAN=1" pip install .
   ```
 
-- **CUDA (NVIDIA):** Wenn du NVIDIA GPU in WSL2 nutzt: CUDA-Toolkit in WSL2 installieren, dann:
+- **CUDA (NVIDIA):** If using an NVIDIA GPU in WSL2, install the CUDA toolkit in WSL2, then:
 
   ```bash
   CMAKE_ARGS="-DGGML_CUDA=1" pip install .
   ```
 
-### 2.4 Server starten
+### 2.4 Start the server
 
-Wie unter Linux (Abschnitt 1.5):
+Same as Linux (Section 1.5):
 
 ```bash
 source venv/bin/activate
@@ -138,46 +138,46 @@ wyoming-whisper-cpp --model tiny.en-q5_1 --language en --uri 'tcp://0.0.0.0:1030
 
 ---
 
-## 3. Windows (nativer Build)
+## 3. Windows (native build)
 
-### 3.1 Voraussetzungen installieren
+### 3.1 Install prerequisites
 
 1. **Python 3.7+**  
-   Von [python.org](https://www.python.org/downloads/) oder z. B. Microsoft Store. Bei der Installation „Add Python to PATH“ aktivieren.
+   From [python.org](https://www.python.org/downloads/) or e.g. Microsoft Store. Enable "Add Python to PATH" during installation.
 
-2. **Visual Studio Build Tools** (C++-Compiler)  
-   - [Build Tools für Visual Studio](https://visualstudio.microsoft.com/visual-cpp-build-tools/) herunterladen  
-   - Bei der Installation die Workload **„Desktopentwicklung mit C++“** auswählen (enthält MSVC und Windows SDK).
+2. **Visual Studio Build Tools** (C++ compiler)  
+   - Download [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)  
+   - During setup, select the **"Desktop development with C++"** workload (includes MSVC and Windows SDK).
 
 3. **CMake**  
-   - Von [cmake.org](https://cmake.org/download/) oder z. B. `winget install Kitware.CMake`  
-   - CMake soll in der PATH liegen.
+   - From [cmake.org](https://cmake.org/download/) or e.g. `winget install Kitware.CMake`  
+   - CMake should be on your PATH.
 
 4. **Git**  
-   - [git-scm.com](https://git-scm.com/download/win) – für Klonen und (optional) Modell-Download per Git Bash.
+   - [git-scm.com](https://git-scm.com/download/win) – for cloning and (optionally) model download via Git Bash.
 
-### 3.2 Repository klonen (mit Submodul)
+### 3.2 Clone repository (with submodule)
 
-In **PowerShell** oder **Eingabeaufforderung**:
+In **PowerShell** or **Command Prompt**:
 
 ```powershell
 git clone https://github.com/rhasspy/wyoming-whisper-cpp.git --recursive
 cd wyoming-whisper-cpp
 ```
 
-Falls schon ohne `--recursive` geklont (oder der Ordner `whisper.cpp` leer ist), **vor** `pip install .` ausführen:
+If you already cloned without `--recursive` (or the `whisper.cpp` folder is empty), run this **before** `pip install .`:
 
 ```powershell
 git submodule update --init --recursive
 ```
 
-Ohne dieses Submodul schlägt der Build mit „whisper.cpp does not contain a CMakeLists.txt“ fehl.
+Without this submodule, the build fails with "whisper.cpp does not contain a CMakeLists.txt".
 
-#### Submodule-Fehler: „not our ref“ / „Direct fetching of that commit failed“
+#### Submodule error: "not our ref" / "Direct fetching of that commit failed"
 
-Wenn `git submodule update --init --recursive` mit **„not our ref“** oder **„did not contain … Direct fetching of that commit failed“** abbricht, zeigt das Repo auf einen Commit, den es im Upstream (ggerganov/whisper.cpp) nicht mehr gibt. Submodul auf einen gültigen Stand bringen:
+If `git submodule update --init --recursive` fails with **"not our ref"** or **"did not contain … Direct fetching of that commit failed"**, the repo is pointing at a commit that no longer exists in upstream (ggerganov/whisper.cpp). Fix the submodule to a valid ref:
 
-**Windows (PowerShell, im Repo-Root):**
+**Windows (PowerShell, in repo root):**
 
 ```powershell
 .\script\fix-whisper-submodule.ps1
@@ -194,13 +194,13 @@ git add whisper.cpp
 git commit -m "fix: point whisper.cpp submodule to v1.8.3"
 ```
 
-Danach wieder `pip install .` ausführen.
+Then run `pip install .` again.
 
-### 3.3 Virtuelle Umgebung und Paket installieren
+### 3.3 Virtual environment and package install
 
-**Wichtig:** Führe `pip install .` in der **Developer PowerShell** bzw. **„x64 Native Tools Command Prompt“** deiner Visual-Studio-Version aus (Startmenü: z. B. „Developer PowerShell for VS 2022“ oder „VS 2026“). Dort sind Compiler und Build-Tools in der PATH – sonst schlägt der Build mit „Visual Studio not found“ oder „Ninja not found“ fehl.
+**Important:** Run `pip install .` from **Developer PowerShell** or **"x64 Native Tools Command Prompt"** for your Visual Studio version (Start menu: e.g. "Developer PowerShell for VS 2022" or "VS 2026"). That ensures the compiler and build tools are on PATH; otherwise you may get "Visual Studio not found" or "Ninja not found".
 
-In **PowerShell** (im Projektordner):
+In **PowerShell** (in the project folder):
 
 ```powershell
 python -m venv venv
@@ -209,75 +209,75 @@ pip install -r requirements.txt
 pip install .
 ```
 
-Falls Ausführungsrichtlinien Fehler machen:
+If execution policy causes errors:
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-#### Build-Fehler: „Visual Studio not found“ / „Ninja not found“
+#### Build error: "Visual Studio not found" / "Ninja not found"
 
-- **Lösung 1 – Developer-Umgebung nutzen:**  
-  Startmenü → **„Developer PowerShell for VS 2022“** (oder deine Version, z. B. **„Developer PowerShell for VS 2026“**) öffnen. In dieses Fenster wechseln, zum Projektordner (`cd C:\git\...\wyoming-whisper-cpp`), venv aktivieren, dann `pip install .` ausführen.
+- **Fix 1 – Use developer environment:**  
+  Open **"Developer PowerShell for VS 2022"** (or your version, e.g. **"Developer PowerShell for VS 2026"**) from the Start menu. In that window, go to the project folder (`cd C:\path\to\wyoming-whisper-cpp`), activate venv, then run `pip install .`.
 
-- **Lösung 2 – Visual Studio 2026 (oder neuer):**  
-  scikit-build sucht standardmäßig nur nach VS 2017/2019/2022. Bei **VS 2026** den Generator explizit setzen (CMake 4.2+ für „Visual Studio 18 2026“ nötig):
+- **Fix 2 – Visual Studio 2026 (or newer):**  
+  scikit-build looks for VS 2017/2019/2022 by default. For **VS 2026** set the generator explicitly (CMake 4.2+ required for "Visual Studio 18 2026"):
 
 ```powershell
 $env:CMAKE_GENERATOR = "Visual Studio 18 2026"
 pip install .
 ```
 
-  Bei **VS 2025** ggf. `"Visual Studio 17 2025"` o. Ä. (Generator-Namen in der [CMake-Doku](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) prüfen).
+  For **VS 2025** you may need `"Visual Studio 17 2025"` etc. (check [CMake docs](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) for generator names).
 
-- **Lösung 3 – Ninja:**  
-  Ninja installieren (`winget install Ninja-build.Ninja`), dann in der **Developer PowerShell**:
+- **Fix 3 – Ninja:**  
+  Install Ninja (`winget install Ninja-build.Ninja`), then in **Developer PowerShell**:
 
 ```powershell
 $env:CMAKE_GENERATOR = "Ninja"
 pip install .
 ```
 
-#### Build-Fehler: „No module named 'skbuild'“
+#### Build error: "No module named 'skbuild'"
 
-Die Build-Abhängigkeiten (scikit-build, cmake) müssen **vor** `pip install .` im venv liegen. Einmal ausführen:
+Build dependencies (scikit-build, cmake) must be installed **before** `pip install .`. Run once:
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-Danach erneut `pip install .` (ggf. mit CMAKE_GENERATOR und CMAKE_ARGS).
+Then run `pip install .` again (with CMAKE_GENERATOR and CMAKE_ARGS if needed).
 
-#### Build-Fehler: „Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR glslc)“
+#### Build error: "Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR glslc)"
 
-Für einen Vulkan-Build wird unter Windows das **Vulkan SDK** benötigt:
+A Vulkan build on Windows requires the **Vulkan SDK**:
 
-1. **Vulkan SDK** von [LunarG](https://vulkan.lunarg.com/sdk/home#windows) herunterladen und installieren.
-2. **Neue** Developer-PowerShell (oder neues Terminal) öffnen, damit die Umgebungsvariable **VULKAN_SDK** gesetzt ist (wird vom Installer oft automatisch gesetzt, z. B. `C:\VulkanSDK\1.3.296.0`).
-3. Falls CMake Vulkan weiterhin nicht findet: `VULKAN_SDK` manuell setzen, z. B. `$env:VULKAN_SDK = "C:\VulkanSDK\1.3.296.0"` (Pfad zu deiner Installation anpassen), dann `pip install .` erneut ausführen.
+1. Download and install the **Vulkan SDK** from [LunarG](https://vulkan.lunarg.com/sdk/home#windows).
+2. Open a **new** Developer PowerShell (or new terminal) so the **VULKAN_SDK** environment variable is set (the installer often sets it automatically, e.g. `C:\VulkanSDK\1.3.296.0`).
+3. If CMake still cannot find Vulkan, set `VULKAN_SDK` manually, e.g. `$env:VULKAN_SDK = "C:\VulkanSDK\1.3.296.0"` (adjust to your install path), then run `pip install .` again.
 
-#### Build-Fehler: „FileTracker FTK1011“ / „Das System kann den angegebenen Pfad nicht finden“ (Vulkan-Build)
+#### Build error: "FileTracker FTK1011" / "The system cannot find the path specified" (Vulkan build)
 
-Der Vulkan-Build erzeugt sehr tiefe Unterordner (z. B. `_skbuild\...\vulkan-shaders-gen-prefix\...`). Unter Windows kann die **Pfadlänge** dann die Grenze von 260 Zeichen überschreiten, und MSBuild meldet FTK1011.
+The Vulkan build creates very deep directory trees (e.g. `_skbuild\...\vulkan-shaders-gen-prefix\...`). On Windows the **path length** can exceed the 260-character limit and MSBuild reports FTK1011.
 
-- **Lösung 1 – Kürzeren Projektpfad verwenden (empfohlen):**  
-  Repo in einen kurzen Pfad klonen und dort bauen, z. B.:
+- **Fix 1 – Use a short project path (recommended):**  
+  Clone the repo into a short path and build there, e.g.:
   ```powershell
   cd C:\
   git clone https://github.com/rhasspy/wyoming-whisper-cpp.git --recursive w
   cd w
-  # venv anlegen, CMAKE_GENERATOR + CMAKE_ARGS setzen, pip install .
+  # create venv, set CMAKE_GENERATOR + CMAKE_ARGS, pip install .
   ```
-  Beispiel: `C:\w` statt `C:\git\wyoming-faster-whisper\wyoming-whisper-cpp`.
+  Example: `C:\w` instead of a long path like `C:\Users\...\wyoming-whisper-cpp`.
 
-- **Lösung 2 – Lange Pfade in Windows erlauben:**  
-  [Lange Pfade aktivieren](https://learn.microsoft.com/de-de/windows/win32/fileio/maximum-file-path-limitation#enable-long-paths-in-windows-10-version-1607-and-later) (Group Policy oder Registry `LongPathsEnabled = 1`), danach Rechner neu starten und Build erneut ausführen.
+- **Fix 2 – Enable long paths in Windows:**  
+  [Enable long paths](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation#enable-long-paths-in-windows-10-version-1607-and-later) (Group Policy or Registry `LongPathsEnabled = 1`), then reboot and run the build again.
 
 ### 3.4 Optional: GPU (Vulkan, Intel SYCL, CUDA)
 
-**Vulkan (z. B. Intel Arc / integrierte Intel-GPU):**
+**Vulkan (e.g. Intel Arc / integrated Intel GPU):**
 
-Unter Windows wird dafür das **Vulkan SDK** benötigt (CMake sucht Vulkan-Libs, Headers und den Shader-Compiler **glslc**). Siehe unten bei „Could NOT find Vulkan“.
+On Windows this requires the **Vulkan SDK** (CMake needs Vulkan libs, headers, and the **glslc** shader compiler). See "Could NOT find Vulkan" above.
 
 ```powershell
 $env:CMAKE_ARGS="-DGGML_VULKAN=1"
@@ -285,17 +285,16 @@ pip install .
 ```
 
 **Intel SYCL (oneAPI):**  
-SYCL braucht den **Intel DPC++-Compiler (icx)**, nicht MSVC. In der normalen PowerShell mit Visual Studio schlägt der Build mit „C++ compiler lacks SYCL support“ fehl.
+SYCL requires the **Intel DPC++ compiler (icx)**, not MSVC. In a normal PowerShell with Visual Studio the build fails with "C++ compiler lacks SYCL support".
 
-- **Einfacher für Intel-GPU:** Statt SYCL **Vulkan** nutzen (siehe oben; funktioniert mit MSVC).
-- **SYCL trotzdem:** „Intel oneAPI 2024 command prompt for Intel 64“ (oder neuer) aus dem Startmenü öffnen, dann im Projektordner:
-  - Ninja als Generator und Intel-Compiler verwenden:
+- **Easier for Intel GPU:** Use **Vulkan** instead of SYCL (see above; works with MSVC).
+- **SYCL anyway:** Open "Intel oneAPI 2024 command prompt for Intel 64" (or newer) from the Start menu, then in the project folder use Ninja and the Intel compiler:
   ```powershell
   $env:CMAKE_GENERATOR = "Ninja"
   $env:CMAKE_ARGS = "-DGGML_SYCL=ON"
   pip install .
   ```
-  In der oneAPI-Eingabeaufforderung sind `CC=icx` und `CXX=icpx` meist schon gesetzt; CMake nutzt dann den Intel-Compiler für SYCL.
+  In the oneAPI prompt `CC=icx` and `CXX=icpx` are usually set; CMake will then use the Intel compiler for SYCL.
 
 **NVIDIA CUDA:**
 
@@ -304,35 +303,35 @@ $env:CMAKE_ARGS="-DGGML_CUDA=1"
 pip install .
 ```
 
-### 3.5 Modell (unter Windows)
+### 3.5 Model (on Windows)
 
-Die automatische Modell-Installation nutzt ein Shell-Skript. Eine der Optionen:
+Automatic model download uses a shell script. Options:
 
 - **Option A – Git Bash:**  
-  Git Bash öffnen, in den Projektordner wechseln, venv aktivieren (z. B. `source venv/Scripts/activate`) und den Server wie unten starten. Beim ersten Start wird das Modell heruntergeladen.
+  Open Git Bash, go to the project folder, activate venv (e.g. `source venv/Scripts/activate`) and start the server as below. On first run the model will be downloaded.
 
-- **Option B – Manuell:**  
-  Gewünschtes Modell von [Hugging Face (whisper.cpp)](https://huggingface.co/ggerganov/whisper.cpp) herunterladen (z. B. `ggml-tiny.en-q5_1.bin`) und in einen Ordner legen, den du als `--data-dir` angibst.
+- **Option B – Manual:**  
+  Download the desired model from [Hugging Face (whisper.cpp)](https://huggingface.co/ggerganov/whisper.cpp) (e.g. `ggml-tiny.en-q5_1.bin`) and put it in a folder you use as `--data-dir`.
 
-### 3.6 Server starten
+### 3.6 Start the server
 
-PowerShell (venv aktiviert):
+PowerShell (with venv activated):
 
 ```powershell
 .\venv\Scripts\Activate.ps1
 wyoming-whisper-cpp --model tiny.en-q5_1 --language en --uri 'tcp://0.0.0.0:10300' --data-dir .\data --download-dir .\data
 ```
 
-Wenn das Modell bereits in `.\data` liegt (z. B. `ggml-tiny.en-q5_1.bin`), startet der Server ohne Download.
+If the model is already in `.\data` (e.g. `ggml-tiny.en-q5_1.bin`), the server starts without downloading.
 
 ---
 
-## Kurzreferenz: Erster Start nach Installation
+## Quick reference: First run after install
 
-| Plattform | venv aktivieren           | Server starten (Beispiel) |
-|-----------|---------------------------|----------------------------|
-| Linux     | `source venv/bin/activate` | `wyoming-whisper-cpp --model tiny.en-q5_1 --language en --uri 'tcp://0.0.0.0:10300' --data-dir ./data --download-dir ./data` |
-| WSL2      | wie Linux                 | wie Linux                  |
-| Windows   | `.\venv\Scripts\Activate.ps1` | `wyoming-whisper-cpp --model tiny.en-q5_1 --language en --uri 'tcp://0.0.0.0:10300' --data-dir .\data --download-dir .\data` |
+| Platform | Activate venv           | Start server (example) |
+|----------|--------------------------|--------------------------|
+| Linux    | `source venv/bin/activate` | `wyoming-whisper-cpp --model tiny.en-q5_1 --language en --uri 'tcp://0.0.0.0:10300' --data-dir ./data --download-dir ./data` |
+| WSL2     | same as Linux            | same as Linux             |
+| Windows  | `.\venv\Scripts\Activate.ps1` | `wyoming-whisper-cpp --model tiny.en-q5_1 --language en --uri 'tcp://0.0.0.0:10300' --data-dir .\data --download-dir .\data` |
 
-Weitere Optionen: `wyoming-whisper-cpp --help`
+More options: `wyoming-whisper-cpp --help`

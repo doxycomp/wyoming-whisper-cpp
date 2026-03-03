@@ -4,7 +4,7 @@
 
 ## Local Install
 
-**Ausführliche Anleitung für Linux, WSL2 und Windows:** [INSTALL.md](INSTALL.md)
+**Detailed install guide for Linux, WSL2, and Windows:** [INSTALL.md](INSTALL.md)
 
 Install dependencies:
 

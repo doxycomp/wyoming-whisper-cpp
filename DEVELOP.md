@@ -1,30 +1,30 @@
-# Entwickler-Setup (wyoming-whisper-cpp)
+# Developer setup (wyoming-whisper-cpp)
 
-Kurze Anleitung, um das Projekt zu initialisieren und lokal zu entwickeln.
+Short guide to initialize the project and develop locally.
 
-## Repo-Überblick (nach PR #4)
+## Repo overview (after PR #4)
 
-- **wyoming-whisper-cpp**: Wyoming-Protocol-Server, der [whisper.cpp](https://github.com/ggerganov/whisper.cpp) als ASR anbietet.
-- **whisper.cpp** ist ein **Git-Submodul** (nicht mehr gebündelt). Build erfolgt über **scikit-build** beim `pip install .` – es gibt keine separate CMake-/Make-Stufe mehr.
-- Die Binary **whisper-wyoming** wird mit dem Python-Paket gebaut und in `wyoming_whisper_cpp/bin/` installiert.
-- **GPU-Unterstützung**: OpenVINO, Core ML etc. über `CMAKE_ARGS` beim `pip install` (siehe README).
+- **wyoming-whisper-cpp**: Wyoming protocol server that exposes [whisper.cpp](https://github.com/ggerganov/whisper.cpp) as ASR.
+- **whisper.cpp** is a **Git submodule** (no longer bundled). The build runs via **scikit-build** on `pip install .` – there is no separate CMake/Make step.
+- The **whisper-wyoming** binary is built with the Python package and installed into `wyoming_whisper_cpp/bin/`.
+- **GPU support**: OpenVINO, Core ML, etc. via `CMAKE_ARGS` at `pip install` (see README).
 
-## 1. Projekt initialisieren
+## 1. Initialize the project
 
-### Klonen mit Submodul
+### Clone with submodule
 
 ```powershell
-git clone --recursive https://github.com/doxycomp/wyoming-whisper-cpp.git
+git clone --recursive https://github.com/rhasspy/wyoming-whisper-cpp.git
 cd wyoming-whisper-cpp
 ```
 
-Falls schon geklont ohne `--recursive`:
+If you already cloned without `--recursive`:
 
 ```powershell
 git submodule update --init --recursive
 ```
 
-### Virtualenv + Abhängigkeiten
+### Virtualenv and dependencies
 
 ```powershell
 python -m venv .venv
@@ -33,7 +33,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-Unter Linux/macOS:
+On Linux/macOS:
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -41,17 +41,17 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-**Hinweis:** `pip install -e .` baut über scikit-build das Submodul whisper.cpp und die **whisper-wyoming**-Binary. Dafür werden CMake und ein C++-Compiler benötigt (unter Windows: Visual Studio Build Tools oder „Desktop development with C++“).
+**Note:** `pip install -e .` builds the whisper.cpp submodule and the **whisper-wyoming** binary via scikit-build. You need CMake and a C++ compiler (on Windows: Visual Studio Build Tools or "Desktop development with C++").
 
-### Dev-Tools (optional)
+### Dev tools (optional)
 
 ```powershell
 pip install -r requirements_dev.txt
 ```
 
-### GPU-Build (optional)
+### GPU build (optional)
 
-Laut [README](README.md):
+See [README](README.md):
 
 ```powershell
 # Vulkan
@@ -64,9 +64,9 @@ CMAKE_ARGS="-DWHISPER_OPENVINO=1" pip install .
 CMAKE_ARGS="-DWHISPER_COREML=1" pip install .
 ```
 
-## 2. Server starten
+## 2. Run the server
 
-Es gibt **kein** `--whisper-cpp-dir` mehr; die Binary kommt aus dem Paket.
+There is **no** `--whisper-cpp-dir` anymore; the binary comes from the package.
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -78,13 +78,13 @@ wyoming-whisper-cpp `
   --download-dir .\local
 ```
 
-Oder mit `python -m`:
+Or with `python -m`:
 
 ```powershell
 python -m wyoming_whisper_cpp --model tiny.en-q5_1 --language en --uri 'tcp://0.0.0.0:10300' --data-dir .\local --download-dir .\local
 ```
 
-Modell-Download nutzt das Script `download-ggml-model.sh` (wird mit dem Paket installiert). Unter Windows ggf. Git Bash oder WSL nötig, oder Modell manuell als `ggml-<model>.bin` in `--data-dir` legen.
+Model download uses the `download-ggml-model.sh` script (installed with the package). On Windows you may need Git Bash or WSL, or place the model manually as `ggml-<model>.bin` in `--data-dir`.
 
 ## 3. Tests
 
@@ -92,25 +92,25 @@ Modell-Download nutzt das Script `download-ggml-model.sh` (wird mit dem Paket in
 pytest tests\ -v
 ```
 
-Die Tests erwarten die gebaute **whisper-wyoming**-Binary und das Modell (z.B. `tiny-q5_1`) in `local/`.
+Tests expect the built **whisper-wyoming** binary and a model (e.g. `tiny-q5_1`) in `local/`.
 
-## 4. Wo du Features hinzufügen kannst
+## 4. Where to add features
 
-| Bereich | Ort | Beschreibung |
-|--------|-----|--------------|
-| CLI / Server-Args | `wyoming_whisper_cpp/__main__.py` | Argumente, URI, Defaults; Aufruf von `bin/whisper-wyoming` |
-| Wyoming-Events / Transkription | `wyoming_whisper_cpp/handler.py` | Audio → WAV, Subprocess, Ausgabe verarbeiten |
-| Modell-Download | `wyoming_whisper_cpp/download.py` | Modelle, Pfade, `download-ggml-model.sh` |
-| Sprachen / Konstanten | `wyoming_whisper_cpp/const.py` | Unterstützte Sprachen |
-| C++ Wyoming-Binary | `wyoming/` (wyoming.cpp, CMakeLists.txt) | whisper-wyoming Executable |
-| Version | `wyoming_whisper_cpp/VERSION` | Paketversion |
+| Area | Location | Description |
+|------|----------|-------------|
+| CLI / server args | `wyoming_whisper_cpp/__main__.py` | Arguments, URI, defaults; invocation of `bin/whisper-wyoming` |
+| Wyoming events / transcription | `wyoming_whisper_cpp/handler.py` | Audio → WAV, subprocess, output handling |
+| Model download | `wyoming_whisper_cpp/download.py` | Models, paths, `download-ggml-model.sh` |
+| Languages / constants | `wyoming_whisper_cpp/const.py` | Supported languages |
+| C++ Wyoming binary | `wyoming/` (wyoming.cpp, CMakeLists.txt) | whisper-wyoming executable |
+| Version | `wyoming_whisper_cpp/VERSION` | Package version |
 
-## 5. Code-Qualität (Dev-Requirements)
+## 5. Code quality (dev requirements)
 
-- **Formatierung:** `black .` / `isort .`
+- **Formatting:** `black .` / `isort .`
 - **Linting:** `flake8`, `pylint`
-- **Typen:** `mypy wyoming_whisper_cpp`
+- **Types:** `mypy wyoming_whisper_cpp`
 
 ---
 
-**PR #4** („Replace bundled whisper.cpp with submodule“) ist eingebunden: whisper.cpp ist ein Submodul, Build läuft über scikit-build, GPU-Optionen über `CMAKE_ARGS`, keine separate Build-Stufe mehr.
+**PR #4** ("Replace bundled whisper.cpp with submodule") is merged: whisper.cpp is a submodule, build is via scikit-build, GPU options via `CMAKE_ARGS`, no separate build stage.
