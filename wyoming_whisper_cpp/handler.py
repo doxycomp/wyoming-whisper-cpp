@@ -70,31 +70,53 @@ class WhisperCppEventHandler(AsyncEventHandler):
                 assert self.model_proc.stdin is not None
                 assert self.model_proc.stdout is not None
 
-                async with self.model_proc_lock:
-                    request_str = json.dumps(
-                        {"size": len(wav_bytes), "language": self._language}
+                if self.model_proc.returncode is not None:
+                    _LOGGER.error(
+                        "Model process already exited (code=%s). Restart the server.",
+                        self.model_proc.returncode,
                     )
-                    request_line = f"{request_str}\n".encode("utf-8")
-                    self.model_proc.stdin.write(request_line)
-                    self.model_proc.stdin.write(wav_bytes)
-                    await self.model_proc.stdin.drain()
+                    await self.write_event(Transcript(text="").event())
+                    self.audio = bytes()
+                    return False
 
-                    lines = []
-                    line = (await self.model_proc.stdout.readline()).decode().strip()
-                    while line != "<|endoftext|>":
-                        if line:
-                            lines.append(line)
+                async with self.model_proc_lock:
+                    try:
+                        request_str = json.dumps(
+                            {"size": len(wav_bytes), "language": self._language}
+                        )
+                        request_line = f"{request_str}\n".encode("utf-8")
+                        self.model_proc.stdin.write(request_line)
+                        self.model_proc.stdin.write(wav_bytes)
+                        await self.model_proc.stdin.drain()
+
+                        lines = []
                         line = (
                             (await self.model_proc.stdout.readline()).decode().strip()
                         )
+                        while line != "<|endoftext|>":
+                            if line:
+                                lines.append(line)
+                            line = (
+                                (
+                                    await self.model_proc.stdout.readline()
+                                ).decode().strip()
+                            )
 
-                text = " ".join(lines)
-                text = text.replace("[BLANK_AUDIO]", "").strip()
+                        text = " ".join(lines)
+                        text = text.replace("[BLANK_AUDIO]", "").strip()
+                    except (ConnectionResetError, BrokenPipeError, OSError) as e:
+                        code = self.model_proc.returncode
+                        _LOGGER.error(
+                            "Model process died (connection lost). exit_code=%s error=%s. Restart the server. If built with OpenVINO, ensure OpenVINO runtime DLLs are on PATH and encoder model files are in --data-dir.",
+                            code,
+                            e,
+                        )
+                        text = ""
 
-            _LOGGER.info(text)
+                _LOGGER.info(text or "(no text)")
 
-            await self.write_event(Transcript(text=text).event())
-            _LOGGER.debug("Completed request")
+                await self.write_event(Transcript(text=text).event())
+                _LOGGER.debug("Completed request")
 
             # Reset
             self.audio = bytes()

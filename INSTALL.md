@@ -253,7 +253,13 @@ Then run `pip install .` again (with CMAKE_GENERATOR and CMAKE_ARGS if needed).
 You have `WHISPER_OPENVINO=1` in `CMAKE_ARGS` (or `CMAKE_ARGS` from a previous session), but the OpenVINO toolkit is not installed or CMake cannot find it.
 
 - **To build without OpenVINO:** Unset or clear `CMAKE_ARGS` and install again. For Vulkan only, set e.g. `$env:CMAKE_ARGS = "-DGGML_VULKAN=1"` (and do not include `-DWHISPER_OPENVINO=1`). Then run `pip install .` again.
-- **To build with OpenVINO:** Install the [OpenVINO toolkit](https://github.com/openvinotoolkit/openvino/releases), run its `setupvars.bat` (or `setupvars.sh` on Linux), then set `OpenVINO_DIR` to the directory containing `OpenVINOConfig.cmake` and run `pip install .` with `CMAKE_ARGS="-DWHISPER_OPENVINO=1"`.
+- **To build with OpenVINO:** Install or extract the [OpenVINO toolkit](https://github.com/openvinotoolkit/openvino/releases). You must set `OpenVINO_DIR` to the directory that contains `OpenVINOConfig.cmake` (usually `<OpenVINO root>\runtime\cmake`). In PowerShell, for a custom install path (e.g. `C:\openvino_toolkit_windows_2026.0.0.20965...\`):
+  ```powershell
+  $env:OpenVINO_DIR = "C:\openvino_toolkit_windows_2026.0.0.20965.c6d6a13a886_x86_64\runtime\cmake"   # use your actual path
+  $env:CMAKE_ARGS = "-DGGML_VULKAN=1 -DWHISPER_OPENVINO=1"
+  pip install .
+  ```
+  If you ran `setupvars.bat` and `INTEL_OPENVINO_DIR` is set, you can use `$env:OpenVINO_DIR = "$env:INTEL_OPENVINO_DIR\runtime\cmake"` instead. The build script also tries to derive `OpenVINO_DIR` from `INTEL_OPENVINO_DIR` when that variable is set.
 
 #### Build error: "Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR glslc)"
 

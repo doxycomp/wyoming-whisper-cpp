@@ -93,7 +93,7 @@ Use Core ML–converted encoder models (e.g. from whisper.cpp’s `models/genera
 
 ### OpenVINO (Intel CPU / GPU)
 
-OpenVINO runs the encoder on Intel CPUs or Intel GPUs (integrated or discrete). **You must install the [OpenVINO toolkit](https://github.com/openvinotoolkit/openvino/releases) first** and set `OpenVINO_DIR` (or `CMAKE_PREFIX_PATH`) so CMake finds `OpenVINOConfig.cmake`. Otherwise the build fails with "Could not find a package configuration file provided by OpenVINO". Without OpenVINO installed, do not set `WHISPER_OPENVINO=1` in `CMAKE_ARGS` (use Vulkan or CPU-only instead). Build with:
+OpenVINO runs the encoder on Intel CPUs or Intel GPUs (integrated or discrete). **You must install or extract the [OpenVINO toolkit](https://github.com/openvinotoolkit/openvino/releases) first.** Set `OpenVINO_DIR` to the directory that contains `OpenVINOConfig.cmake` (usually `<OpenVINO root>/runtime/cmake`). On Windows, e.g. `$env:OpenVINO_DIR = "C:\path\to\openvino_toolkit_windows_...\runtime\cmake"` before running the install. If `INTEL_OPENVINO_DIR` is set (e.g. after `setupvars.bat`), the build will try to use it automatically. Without OpenVINO installed, do not set `WHISPER_OPENVINO=1` in `CMAKE_ARGS`. Build with:
 
 ``` sh
 CMAKE_ARGS="-DWHISPER_OPENVINO=1" pip install .

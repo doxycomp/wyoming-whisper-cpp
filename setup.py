@@ -42,6 +42,19 @@ cmake_args = [
 if os.name == "nt" and os.environ.get("CMAKE_GENERATOR"):
     cmake_args.extend(["-G", os.environ["CMAKE_GENERATOR"], "-A", "x64"])
 
+# If building with OpenVINO, help CMake find it when only INTEL_OPENVINO_DIR is set (e.g. after setupvars.bat)
+env_cmake_args = os.environ.get("CMAKE_ARGS", "")
+if "WHISPER_OPENVINO=1" in env_cmake_args and "OpenVINO_DIR" not in env_cmake_args:
+    intel_ov = os.environ.get("INTEL_OPENVINO_DIR")
+    if intel_ov:
+        ov_cmake = Path(intel_ov) / "runtime" / "cmake"
+        if ov_cmake.is_dir():
+            cmake_args.append(f"-DOpenVINO_DIR={ov_cmake.resolve()}")
+        else:
+            ov_cmake_alt = Path(intel_ov) / "cmake"
+            if ov_cmake_alt.is_dir():
+                cmake_args.append(f"-DOpenVINO_DIR={ov_cmake_alt.resolve()}")
+
 # -----------------------------------------------------------------------------
 
 setup(
