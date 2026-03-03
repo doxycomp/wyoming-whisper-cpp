@@ -248,6 +248,13 @@ pip install -r requirements.txt
 
 Then run `pip install .` again (with CMAKE_GENERATOR and CMAKE_ARGS if needed).
 
+#### Build error: "Could not find a package configuration file provided by OpenVINO"
+
+You have `WHISPER_OPENVINO=1` in `CMAKE_ARGS` (or `CMAKE_ARGS` from a previous session), but the OpenVINO toolkit is not installed or CMake cannot find it.
+
+- **To build without OpenVINO:** Unset or clear `CMAKE_ARGS` and install again. For Vulkan only, set e.g. `$env:CMAKE_ARGS = "-DGGML_VULKAN=1"` (and do not include `-DWHISPER_OPENVINO=1`). Then run `pip install .` again.
+- **To build with OpenVINO:** Install the [OpenVINO toolkit](https://github.com/openvinotoolkit/openvino/releases), run its `setupvars.bat` (or `setupvars.sh` on Linux), then set `OpenVINO_DIR` to the directory containing `OpenVINOConfig.cmake` and run `pip install .` with `CMAKE_ARGS="-DWHISPER_OPENVINO=1"`.
+
 #### Build error: "Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR glslc)"
 
 A Vulkan build on Windows requires the **Vulkan SDK**:
