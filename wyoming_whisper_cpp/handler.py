@@ -4,6 +4,7 @@ import asyncio
 import io
 import json
 import logging
+import re
 import wave
 from asyncio.subprocess import Process
 
@@ -14,6 +15,30 @@ from wyoming.info import Describe, Info
 from wyoming.server import AsyncEventHandler
 
 _LOGGER = logging.getLogger(__name__)
+
+# Regex to strip emojis and similar symbols that are not TTS-friendly (e.g. 👾😊✅)
+_EMOJI_PATTERN = re.compile(
+    "["
+    "\U0001F600-\U0001F64F"  # emoticons
+    "\U0001F300-\U0001F5FF"  # symbols & pictographs
+    "\U0001F680-\U0001F6FF"  # transport & map
+    "\U0001F1E0-\U0001F1FF"  # flags
+    "\U00002702-\U000027B0"
+    "\U000024C2-\U0001F251"
+    "\U0001F900-\U0001F9FF"  # supplemental symbols (e.g. 👾)
+    "\U00002600-\U000026FF"  # misc symbols (e.g. ✅-like)
+    "\U00002700-\U000027BF"  # dingbats (e.g. ✅ ✂)
+    "]+",
+    flags=re.UNICODE,
+)
+
+
+def _strip_emoji(text: str) -> str:
+    """Remove emojis and TTS-unfriendly symbols; collapse spaces left behind."""
+    if not text:
+        return text
+    cleaned = _EMOJI_PATTERN.sub(" ", text)
+    return " ".join(cleaned.split())
 
 
 class WhisperCppEventHandler(AsyncEventHandler):
@@ -123,6 +148,8 @@ class WhisperCppEventHandler(AsyncEventHandler):
                             transcript_lines.append(ln)
                         text = " ".join(transcript_lines)
                         text = text.replace("[BLANK_AUDIO]", "").strip()
+                        if getattr(self.cli_args, "strip_emoji", False):
+                            text = _strip_emoji(text)
                     except (ConnectionResetError, BrokenPipeError, OSError) as e:
                         code = self.model_proc.returncode
                         _LOGGER.error(

@@ -105,6 +105,11 @@ async def main() -> None:
         "--whisper-cpp-args",
         help="Additional arguments to pass to whisper cpp executable",
     )
+    parser.add_argument(
+        "--strip-emoji",
+        action="store_true",
+        help="Remove emojis and similar symbols from transcripts (e.g. 👾😊✅) so output is better suited for TTS.",
+    )
     #
     parser.add_argument("--debug", action="store_true", help="Log DEBUG messages")
     parser.add_argument(
