@@ -51,7 +51,7 @@ docker run -it -p 10300:10300 -v /path/to/local/data:/data rhasspy/wyoming-whisp
 |----------|-----------|--------|
 | **Linux** | Yes | Native. Use `source venv/bin/activate`; Vulkan/SYCL/CUDA as documented. |
 | **WSL2** | Yes | Same as Linux. For GPU: install Vulkan/GPU stack in WSL2 (e.g. Intel/AMD/NVIDIA drivers for WSL2). |
-| **Windows** | Yes | Use `.venv\Scripts\Activate.ps1`; the server uses `whisper-wyoming.exe`. Model download uses a shell script: run from **Git Bash** or **WSL2**, or [download the model](https://huggingface.co/ggerganov/whisper.cpp) manually (e.g. `ggml-<model>.bin`) into `--data-dir`. |
+| **Windows** | Yes | Use `.venv\Scripts\Activate.ps1`; the server uses `whisper-wyoming.exe`. Run `pip install .` from **Developer PowerShell** (VS Build Tools). For **Visual Studio 2026**: `$env:CMAKE_GENERATOR="Visual Studio 18 2026"; pip install .` See [INSTALL.md](INSTALL.md) for details. |
 
 Build requirements: Python 3.7+, CMake 3.16+, and a C++ compiler (e.g. GCC/clang on Linux/WSL2, Visual Studio Build Tools on Windows).
 

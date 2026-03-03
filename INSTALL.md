@@ -171,6 +171,8 @@ git submodule update --init --recursive
 
 ### 3.3 Virtuelle Umgebung und Paket installieren
 
+**Wichtig:** Führe `pip install .` in der **Developer PowerShell** bzw. **„x64 Native Tools Command Prompt“** deiner Visual-Studio-Version aus (Startmenü: z. B. „Developer PowerShell for VS 2022“ oder „VS 2026“). Dort sind Compiler und Build-Tools in der PATH – sonst schlägt der Build mit „Visual Studio not found“ oder „Ninja not found“ fehl.
+
 In **PowerShell** (im Projektordner):
 
 ```powershell
@@ -184,6 +186,29 @@ Falls Ausführungsrichtlinien Fehler machen:
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+#### Build-Fehler: „Visual Studio not found“ / „Ninja not found“
+
+- **Lösung 1 – Developer-Umgebung nutzen:**  
+  Startmenü → **„Developer PowerShell for VS 2022“** (oder deine Version, z. B. **„Developer PowerShell for VS 2026“**) öffnen. In dieses Fenster wechseln, zum Projektordner (`cd C:\git\...\wyoming-whisper-cpp`), venv aktivieren, dann `pip install .` ausführen.
+
+- **Lösung 2 – Visual Studio 2026 (oder neuer):**  
+  scikit-build sucht standardmäßig nur nach VS 2017/2019/2022. Bei **VS 2026** den Generator explizit setzen (CMake 4.2+ für „Visual Studio 18 2026“ nötig):
+
+```powershell
+$env:CMAKE_GENERATOR = "Visual Studio 18 2026"
+pip install .
+```
+
+  Bei **VS 2025** ggf. `"Visual Studio 17 2025"` o. Ä. (Generator-Namen in der [CMake-Doku](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) prüfen).
+
+- **Lösung 3 – Ninja:**  
+  Ninja installieren (`winget install Ninja-build.Ninja`), dann in der **Developer PowerShell**:
+
+```powershell
+$env:CMAKE_GENERATOR = "Ninja"
+pip install .
 ```
 
 ### 3.4 Optional: GPU (Vulkan, Intel SYCL, CUDA)

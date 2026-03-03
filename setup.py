@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 from pathlib import Path
 
 import setuptools
@@ -24,6 +25,16 @@ version = version_path.read_text(encoding="utf-8").strip()
 # Add scikit-build as a build requirement
 setup_requires = ["scikit-build", "cmake>=3.16"]
 
+# On Windows, allow overriding the CMake generator (e.g. for VS 2026: "Visual Studio 18 2026")
+cmake_args = [
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-DWHISPER_BUILD_STATIC=ON",
+    "-DWHISPER_BUILD_EXAMPLES=OFF",
+    "-DWHISPER_BUILD_TESTS=OFF",
+]
+if os.name == "nt" and os.environ.get("CMAKE_GENERATOR"):
+    cmake_args.extend(["-G", os.environ["CMAKE_GENERATOR"], "-A", "x64"])
+
 # -----------------------------------------------------------------------------
 
 setup(
@@ -39,12 +50,7 @@ setup(
     install_requires=requirements,
     setup_requires=setup_requires,
     cmake_install_dir=module_name,
-    cmake_args=[
-        "-DBUILD_SHARED_LIBS=OFF",
-        "-DWHISPER_BUILD_STATIC=ON",
-        "-DWHISPER_BUILD_EXAMPLES=OFF",
-        "-DWHISPER_BUILD_TESTS=OFF",
-    ],
+    cmake_args=cmake_args,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
