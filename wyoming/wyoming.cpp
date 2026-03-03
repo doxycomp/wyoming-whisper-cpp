@@ -466,15 +466,15 @@ int main(int argc, char ** argv) {
         std::size_t num_wav_bytes = request["size"].get<std::size_t>();
         params.language = request["language"].get<std::string>();
 
-        // Read WAV bytes from stdin
-        uint8_t wav_buffer[num_wav_bytes];
-        const std::size_t num_bytes_read = fread(wav_buffer, 1, sizeof(wav_buffer), stdin);
+        // Read WAV bytes from stdin (use vector: no VLA on MSVC)
+        std::vector<uint8_t> wav_buffer(num_wav_bytes);
+        const std::size_t num_bytes_read = fread(wav_buffer.data(), 1, num_wav_bytes, stdin);
         if (num_bytes_read != num_wav_bytes) {
             fprintf(stderr, "error: failed to read expected number of WAV bytes\n");
             break;
         }
 
-        std::string fname_inp = std::string((const char*)wav_buffer, sizeof(wav_buffer));
+        std::string fname_inp((const char*)wav_buffer.data(), num_bytes_read);
 
         std::vector<float> pcmf32;               // mono-channel F32 PCM
         std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
