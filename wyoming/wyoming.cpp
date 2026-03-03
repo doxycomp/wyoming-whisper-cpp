@@ -17,6 +17,8 @@
 #if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
+#include <io.h>
+#include <fcntl.h>
 #endif
 
 #if defined(_MSC_VER)
@@ -458,6 +460,13 @@ int main(int argc, char ** argv) {
             fprintf(stderr, "\n");
         }
     }
+
+#if defined(_WIN32)
+    // Stdin must be binary so fread() gets exact WAV byte count (no \r\n translation)
+    if (_setmode(_fileno(stdin), _O_BINARY) == -1) {
+        fprintf(stderr, "warning: could not set stdin to binary mode\n");
+    }
+#endif
 
     std::string line;
     while (std::getline(std::cin, line)) {

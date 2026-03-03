@@ -54,6 +54,11 @@ async def main() -> None:
         "--audio-context-base", type=int, default=300, help="Base length of audio_ctx"
     )
     parser.add_argument(
+        "--flash-attn",
+        action="store_true",
+        help="Enable Flash Attention (faster on CUDA/Metal if built with support)",
+    )
+    parser.add_argument(
         "--whisper-cpp-args",
         help="Additional arguments to pass to whisper cpp executable",
     )
@@ -133,6 +138,8 @@ async def main() -> None:
     _LOGGER.info("Ready")
 
     optional_args = ["--audio-context-base", str(args.audio_context_base)]
+    if args.flash_attn:
+        optional_args.append("--flash-attn")
     if args.whisper_cpp_args:
         optional_args.extend(shlex.split(args.whisper_cpp_args))
 

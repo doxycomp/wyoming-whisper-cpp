@@ -86,3 +86,13 @@ CMAKE_ARGS="-DGGML_SYCL=ON" pip install .
 - **Core ML (macOS):** `CMAKE_ARGS="-DWHISPER_COREML=1" pip install .`
 - **OpenVINO:** `CMAKE_ARGS="-DWHISPER_OPENVINO=1" pip install .`
 - **CUDA (NVIDIA):** `CMAKE_ARGS="-DGGML_CUDA=1" pip install .`
+
+### Flash Attention
+
+When using **CUDA** or **Metal**, you can enable Flash Attention at runtime for faster inference. Start the server with:
+
+```sh
+wyoming-whisper-cpp ... --flash-attn
+```
+
+Or pass it through: `--whisper-cpp-args "--flash-attn"`. Flash Attention support is included in CUDA/Metal builds of whisper.cpp (v1.6+).
